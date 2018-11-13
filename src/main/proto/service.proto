@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package api;
+
+option java_package = "com.apollo.sso.api";
+option java_outer_classname = "SsoApiProtos";
+
+message token {
+  required string token = 1;
+}
+
+message login {
+  required string username = 1;
+  required string password = 2;
+}
