@@ -1,12 +1,11 @@
 package com.guan.sso.server.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.guan.sso.server.entity.RedisDO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -27,14 +26,14 @@ public class RedisService {
         return redisTemplate;
     }
 
-    public void set(String key, Object value, Long second) {
+    public void set(String key, RedisDO value, Long second) {
         ValueOperations<String,Object> vo = redisTemplate.opsForValue();
         vo.set(key, value, second, TimeUnit.SECONDS);
     }
 
-    public Object get(String key) {
+    public RedisDO get(String key) {
         ValueOperations<String,Object> vo = redisTemplate.opsForValue();
-        return vo.get(key);
+        return (RedisDO) vo.get(key);
     }
 
     public boolean has(String key) {
