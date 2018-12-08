@@ -1,7 +1,6 @@
 package com.guan.sso.server.page;
 
 import com.guan.sso.server.entity.SessionValue;
-import com.guan.sso.server.grpc.stub.AuthRequest;
 import com.guan.sso.server.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

@@ -1,8 +1,7 @@
-package com.guan.sso.server.grpc.stub;
-
-import io.grpc.stub.ClientCalls;
+package com.guan.sso.server.grpc.stub.auth;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
+import static io.grpc.stub.ClientCalls.asyncUnaryCall;
 import static io.grpc.stub.ClientCalls.blockingUnaryCall;
 import static io.grpc.stub.ClientCalls.futureUnaryCall;
 import static io.grpc.stub.ServerCalls.asyncUnaryCall;
@@ -121,7 +120,7 @@ public final class AuthServiceGrpc {
      */
     public void auth(AuthRequest request,
         io.grpc.stub.StreamObserver<AuthReply> responseObserver) {
-      ClientCalls.asyncUnaryCall(
+      asyncUnaryCall(
           getChannel().newCall(getAuthMethod(), getCallOptions()), request, responseObserver);
     }
   }
