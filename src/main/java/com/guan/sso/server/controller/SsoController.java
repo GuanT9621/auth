@@ -40,6 +40,8 @@ public class SsoController {
     private final String msg = "msg";
     private final String loginParamsError = "用户名或密码不正确";
 
+    private final String reason = "exception";
+
     private final String exception = "EXCEPTION :";
 
     private Logger logger = LoggerFactory.getLogger(SsoController.class);
@@ -55,6 +57,12 @@ public class SsoController {
 
     @Autowired
     private HttpServletResponse response;
+
+    @Value("${rpc.ums.port}")
+    private int port;
+
+    @Value("${rpc.ums.address}")
+    private String address;
 
     @Value("${author}")
     private String author;
@@ -81,8 +89,9 @@ public class SsoController {
                 try {
                     uid = auth(username, password);
                 } catch (Exception e) {
+                    logger.error(exception,  e);
                     Status status = Status.fromThrowable(e);
-                    model.addAttribute(exception, status.toString());
+                    model.addAttribute(reason, status.toString());
                     return ERROR_PAGE;
                 }
                 // 验证
@@ -135,7 +144,7 @@ public class SsoController {
     private Long auth(String username, String password) {
         AuthRequest request = AuthRequest.newBuilder().setAcc(username).setPwd(password).build();
         System.out.println(" request ");
-        Channel channel = ManagedChannelBuilder.forAddress("10.0.32.199", 50051).usePlaintext().build();
+        Channel channel = ManagedChannelBuilder.forAddress("10.0.32.199", port).usePlaintext().build();
         AuthServiceGrpc.AuthServiceBlockingStub authServiceBlockingStub = AuthServiceGrpc.newBlockingStub(channel);
         AuthReply reply = authServiceBlockingStub.auth(request);
         System.out.println(" reply ");

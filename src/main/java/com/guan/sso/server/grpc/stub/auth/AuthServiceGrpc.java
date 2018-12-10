@@ -23,7 +23,7 @@ public final class AuthServiceGrpc {
       AuthReply> getAuthMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "auth",
+      fullMethodName = SERVICE_NAME + '/' + "sso",
       requestType = AuthRequest.class,
       responseType = AuthReply.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
@@ -37,13 +37,13 @@ public final class AuthServiceGrpc {
               io.grpc.MethodDescriptor.<AuthRequest, AuthReply>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "AuthService", "auth"))
+                  "AuthService", "sso"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   AuthRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   AuthReply.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuthServiceMethodDescriptorSupplier("auth"))
+                  .setSchemaDescriptor(new AuthServiceMethodDescriptorSupplier("sso"))
                   .build();
           }
         }

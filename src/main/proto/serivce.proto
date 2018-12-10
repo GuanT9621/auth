@@ -10,7 +10,11 @@ message TokenRequest {
     string token = 1;
 }
 
-message TokenReply {
+message VerifyReply {
+    bool real = 1;
+}
+
+message UserReply {
     int64 uid = 1;
 }
 
@@ -19,9 +23,11 @@ message LogoutRequest {
 }
 
 message LogoutReply {
+    bool real = 1;
 }
 
 service SsoService {
-    rpc verifyToken (TokenRequest) returns (TokenReply) {}
+    rpc verifyToken (TokenRequest) returns (VerifyReply) {}
+    rpc getUserByToken (TokenRequest) returns (UserReply) {}
     rpc logout (LogoutRequest) returns (LogoutReply) {}
 }
