@@ -80,7 +80,9 @@ public class SsoController {
             // 检查参数
             if (CommonUtil.isNotBlank(username, password)) {
                 try {
-                    isLogin();
+                    if (isLogin()) {
+                        return JUMP_PAGE;
+                    }
                 } catch (IOException ioe) {
                     logger.error(exception, ioe);
                     return ERROR_PAGE;
@@ -126,13 +128,15 @@ public class SsoController {
      * 判断是否已经登录
      * @return
      */
-    private void isLogin() throws IOException {
+    private boolean isLogin() throws IOException {
         String cookieSk = CookiesUtil.readCookie(request, SSO_COOKIE_NAME);
         if (null != cookieSk && redisService.has(cookieSk)) {
             SessionValue sessionValue = (SessionValue) session.getAttribute(LOGIN_INFO);
             String redirectUrl = sessionValue.getRedirectUrl();
             response.sendRedirect(redirectUrl);
+            return true;
         }
+        return false;
     }
 
     /**

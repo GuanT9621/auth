@@ -5,4 +5,5 @@ public class PageValue {
     public static final String LOGIN_PAGE = "login";
     public static final String X_LOGIN_PAGE = "xlogin";
     public static final String ERROR_PAGE = "error";
+    public static final String JUMP_PAGE = "jump";
 }

@@ -1,6 +1,5 @@
 package com.guan.sso.server.page;
 
-import com.guan.sso.server.entity.RedisDO;
 import com.guan.sso.server.entity.SessionValue;
 import com.guan.sso.server.services.RedisService;
 import com.guan.sso.server.util.CommonUtil;
@@ -71,23 +70,25 @@ public class PageController {
                         Model model) {
         if (checkParams(appId, redirectUrl, xlogin, model)) {
             // 检验是否已经登录
-            try {
-                if (isLogin()) {
+            if (isLogin()) {
+                try {
                     response.sendRedirect(redirectUrl);
+                    return JUMP_PAGE;
+                } catch (IOException ioe) {
+                    return ERROR_PAGE;
                 }
-            } catch (IOException ioe) {
-                return ERROR_PAGE;
-            }
-            // 未登录则进入登录页面
-            SessionValue sessionValue = new SessionValue();
-            sessionValue.setAppId(appId);
-            sessionValue.setRedirectUrl(redirectUrl);
-            sessionValue.setXlogin(xlogin);
-            session.setAttribute(LOGIN_INFO, sessionValue);
-            if (X_LOGIN_MODEL == xlogin) {
-                return X_LOGIN_PAGE;
             } else {
-                return LOGIN_PAGE;
+                // 未登录则进入登录页面
+                SessionValue sessionValue = new SessionValue();
+                sessionValue.setAppId(appId);
+                sessionValue.setRedirectUrl(redirectUrl);
+                sessionValue.setXlogin(xlogin);
+                session.setAttribute(LOGIN_INFO, sessionValue);
+                if (X_LOGIN_MODEL == xlogin) {
+                    return X_LOGIN_PAGE;
+                } else {
+                    return LOGIN_PAGE;
+                }
             }
         }
         return DENY_PAGE;
