@@ -7,11 +7,14 @@ import com.guan.sso.server.grpc.stub.auth.AuthRequest;
 import com.guan.sso.server.grpc.stub.auth.AuthServiceGrpc;
 import com.guan.sso.server.services.RedisService;
 import com.guan.sso.server.util.CommonUtil;
+import com.guan.sso.server.util.CookiesUtil;
 import com.guan.sso.server.util.SnowFlakeGenerator;
+import com.guan.sso.server.util.TokenUtil;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Status;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -19,30 +22,27 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.validation.constraints.NotBlank;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
 import static com.guan.sso.server.constant.GlobalValue.X_LOGIN_MODEL;
 import static com.guan.sso.server.constant.PageValue.*;
-import static com.guan.sso.server.constant.RedisKey.UID_KEY;
 import static com.guan.sso.server.constant.SessionKey.LOGIN_INFO;
+import static com.guan.sso.server.util.CookiesUtil.SSO_COOKIE_NAME;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/server")
 public class SsoController {
-
 
     private final String code = "code";
     private final String msg = "msg";
     private final String loginParamsError = "用户名或密码不正确";
 
-    private final String redirectException = "REDIRECT EXCEPTION : ";
+    private final String exception = "EXCEPTION :";
 
-    private Map<String, Object> resultMap = new HashMap<>();
-
-    private Logger logger;
+    private Logger logger = LoggerFactory.getLogger(SsoController.class);
 
     @Autowired
     private HttpSession session;
@@ -50,52 +50,60 @@ public class SsoController {
     @Autowired
     private RedisService redisService;
 
-//    @Autowired
-//    private HttpServletResponse response;
+    @Autowired
+    private HttpServletRequest request;
+
+    @Autowired
+    private HttpServletResponse response;
 
     @Value("${author}")
     private String author;
+
+    @Value("${domain}")
+    private String domain;
 
     @RequestMapping("/login")
     public String login(@RequestParam(value = "u") String username,
                         @RequestParam(value = "p") String password,
                         Model model) {
-        // 检查参数
-        if (CommonUtil.isNotBlank(username, password)) {
-            Long uid;
-            try {
-                uid = auth(username, password);
-            } catch (Exception e) {
-                Status status = Status.fromThrowable(e);
-                model.addAttribute("exception", status.toString());
-                return ERROR_PAGE;
+        SessionValue sessionValue = (SessionValue) session.getAttribute(LOGIN_INFO);
+        // 前置条件，调用本接口必须经过调用页面
+        if (CommonUtil.isNotNull(sessionValue)) {
+            // 检查参数
+            if (CommonUtil.isNotBlank(username, password)) {
+                try {
+                    isLogin();
+                } catch (IOException ioe) {
+                    logger.error(exception, ioe);
+                    return ERROR_PAGE;
+                }
+                Long uid;
+                try {
+                    uid = auth(username, password);
+                } catch (Exception e) {
+                    Status status = Status.fromThrowable(e);
+                    model.addAttribute(exception, status.toString());
+                    return ERROR_PAGE;
+                }
+                // 验证
+                if(0L != uid) {
+                    RedisDO redisDO = new RedisDO();
+                    redisDO.setUid(uid);
+                    String token = TokenUtil.makeToken();
+                    redisService.set(token, redisDO, 60 * 60L);
+                    CookiesUtil.writeCookie(response, domain, SSO_COOKIE_NAME, token);
+                    try {
+                        String redirectUrl = sessionValue.getRedirectUrl();
+                        String html = "<script type='text/javascript'>location.href='" + redirectUrl + "';</script>";
+                        response.getWriter().print(html);
+                    } catch (IOException e) {
+                        logger.error(exception, e);
+                    }
+                }
             }
-            // 验证
-            if(0L != uid) {
-                SnowFlakeGenerator snowFlakeGenerator = new SnowFlakeGenerator.Factory().create(5L, 5L);
-                Long sk = snowFlakeGenerator.nextId();
-                RedisDO redisDO = new RedisDO();
-                redisDO.setUid(uid);
-
-
-                redisService.set(UID_KEY + uid, redisDO, 60 * 60L);
-
-                //CookiesUtil.writeCookie(response, redisKeyName, sk.toString());
-//                try {
-//                    //response.sendRedirect(s_url);
-//                } catch (IOException e) {
-//                    logger.error(redirectException + e);
-//                }
-            } else {
-                model.addAttribute(code, false);
-                model.addAttribute(msg, loginParamsError);
-            }
-        } else {
+            // 认证成功直接跳转，认证失败才会到达这里
             model.addAttribute(code, false);
             model.addAttribute(msg, loginParamsError);
-        }
-        SessionValue sessionValue = (SessionValue) session.getAttribute(LOGIN_INFO);
-        if (CommonUtil.isNotNull(sessionValue)) {
             if (X_LOGIN_MODEL == sessionValue.getXlogin()) {
                 return X_LOGIN_PAGE;
             } else {
@@ -105,18 +113,40 @@ public class SsoController {
             return DENY_PAGE;
         }
     }
+    /**
+     * 判断是否已经登录
+     * @return
+     */
+    private void isLogin() throws IOException {
+        String cookieSk = CookiesUtil.readCookie(request, SSO_COOKIE_NAME);
+        if (null != cookieSk && redisService.has(cookieSk)) {
+            SessionValue sessionValue = (SessionValue) session.getAttribute(LOGIN_INFO);
+            String redirectUrl = sessionValue.getRedirectUrl();
+            response.sendRedirect(redirectUrl);
+        }
+    }
 
+    /**
+     * 登录认证
+     * @param username
+     * @param password
+     * @return
+     */
     private Long auth(String username, String password) {
         AuthRequest request = AuthRequest.newBuilder().setAcc(username).setPwd(password).build();
         System.out.println(" request ");
-        Channel channel = ManagedChannelBuilder.forAddress("127.0.0.1", 50051).usePlaintext().build();
+        Channel channel = ManagedChannelBuilder.forAddress("10.0.32.199", 50051).usePlaintext().build();
         AuthServiceGrpc.AuthServiceBlockingStub authServiceBlockingStub = AuthServiceGrpc.newBlockingStub(channel);
         AuthReply reply = authServiceBlockingStub.auth(request);
         System.out.println(" reply ");
         return reply.getId();
     }
 
-
+    /**
+     * 作者
+     * @param model
+     * @return
+     */
     @RequestMapping("/author")
     public String author(Model model) {
         model.addAttribute("author", author);
