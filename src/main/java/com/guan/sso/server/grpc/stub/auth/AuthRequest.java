@@ -341,7 +341,7 @@ private static final long serialVersionUID = 0L;
               AuthRequest.class, AuthRequest.Builder.class);
     }
 
-    // Construct using com.guan.ums.core.grpc.server.sso.AuthRequest.newBuilder()
+    // Construct using com.guan.ums.core.grpc.server.autoPro.auth.AuthRequest.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
