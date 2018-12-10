@@ -143,7 +143,7 @@ public class SsoController {
      */
     private Long auth(String username, String password) {
         AuthRequest request = AuthRequest.newBuilder().setAcc(username).setPwd(password).build();
-        Channel channel = ManagedChannelBuilder.forAddress("10.0.32.199", port).usePlaintext().build();
+        Channel channel = ManagedChannelBuilder.forAddress(address, port).usePlaintext().build();
         AuthServiceGrpc.AuthServiceBlockingStub authServiceBlockingStub = AuthServiceGrpc.newBlockingStub(channel);
         AuthReply reply = authServiceBlockingStub.auth(request);
         return reply.getId();
