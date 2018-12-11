@@ -36,8 +36,12 @@ public class RedisService {
         return (RedisDO) vo.get(key);
     }
 
-    public boolean has(String key) {
-        return redisTemplate.hasKey(key);
+    public boolean has(String key, Long second) {
+        boolean has = redisTemplate.hasKey(key);
+        if (has) {
+            redisTemplate.expire(key, second, TimeUnit.SECONDS);
+        }
+        return has;
     }
 
     public void delete(String key) {

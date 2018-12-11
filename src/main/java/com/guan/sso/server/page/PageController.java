@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.guan.sso.server.constant.GlobalValue.TOKEN_ALIVE_TIME;
 import static com.guan.sso.server.constant.GlobalValue.X_LOGIN_MODEL;
 import static com.guan.sso.server.constant.PageValue.*;
 import static com.guan.sso.server.constant.SessionKey.LOGIN_INFO;
@@ -127,7 +128,7 @@ public class PageController {
      */
     private boolean isLogin() {
         String cookieSk = CookiesUtil.readCookie(request, SSO_COOKIE_NAME);
-        return null != cookieSk && redisService.has(cookieSk);
+        return null != cookieSk && redisService.has(cookieSk, TOKEN_ALIVE_TIME);
     }
 
 }

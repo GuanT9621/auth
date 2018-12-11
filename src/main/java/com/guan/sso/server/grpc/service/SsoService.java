@@ -8,6 +8,8 @@ import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.guan.sso.server.constant.GlobalValue.TOKEN_ALIVE_TIME;
+
 @Service
 public class SsoService extends SsoServiceGrpc.SsoServiceImplBase {
 
@@ -21,7 +23,7 @@ public class SsoService extends SsoServiceGrpc.SsoServiceImplBase {
     public void verifyToken(TokenRequest request, StreamObserver<VerifyReply> responseObserver) {
         String token = request.getToken();
         try {
-            VerifyReply reply = VerifyReply.newBuilder().setReal(redisService.has(token)).build();
+            VerifyReply reply = VerifyReply.newBuilder().setReal(redisService.has(token, TOKEN_ALIVE_TIME)).build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         } catch (Exception e) {
@@ -34,7 +36,7 @@ public class SsoService extends SsoServiceGrpc.SsoServiceImplBase {
         String token = request.getToken();
         long uid = 0L;
         try {
-            if (redisService.has(token)) {
+            if (redisService.has(token, TOKEN_ALIVE_TIME)) {
                 RedisDO redisDO = redisService.get(token);
                 uid = redisDO.getUid();
             }

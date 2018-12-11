@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
+import static com.guan.sso.server.constant.GlobalValue.TOKEN_ALIVE_TIME;
 import static com.guan.sso.server.constant.GlobalValue.X_LOGIN_MODEL;
 import static com.guan.sso.server.constant.PageValue.*;
 import static com.guan.sso.server.constant.SessionKey.LOGIN_INFO;
@@ -101,7 +102,7 @@ public class SsoController {
                     RedisDO redisDO = new RedisDO();
                     redisDO.setUid(uid);
                     String token = TokenUtil.makeToken();
-                    redisService.set(token, redisDO, 60 * 60L);
+                    redisService.set(token, redisDO, TOKEN_ALIVE_TIME);
                     CookiesUtil.writeCookie(response, domain, SSO_COOKIE_NAME, token);
                     try {
                         String redirectUrl = sessionValue.getRedirectUrl();
@@ -130,7 +131,7 @@ public class SsoController {
      */
     private boolean isLogin() throws IOException {
         String cookieSk = CookiesUtil.readCookie(request, SSO_COOKIE_NAME);
-        if (null != cookieSk && redisService.has(cookieSk)) {
+        if (null != cookieSk && redisService.has(cookieSk, TOKEN_ALIVE_TIME)) {
             SessionValue sessionValue = (SessionValue) session.getAttribute(LOGIN_INFO);
             String redirectUrl = sessionValue.getRedirectUrl();
             response.sendRedirect(redirectUrl);
