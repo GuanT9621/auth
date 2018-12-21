@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>login</title>
-    <link rel="stylesheet" href="/css/xlogin.css">
+    <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
     <div class="login" id = "login" style="height: 750px;">
@@ -17,6 +17,13 @@
                         <form action="../login" method="POST">
                             <input type="text"  class="login_input" name="u" placeholder="请输入用户名"/><br>
                             <input type="password"  class="login_input" name="p" placeholder="密码"/><br>
+                            <label>记住我</label>
+                            <select name="k">
+                                <option value ="0">不用</option>
+                                <option value ="1">一天</option>
+                                <option value="7">一周</option>
+                                <option value="30">一月</option>
+                            </select><br>
                             <input type="submit" value="登录" class="login_btn"/>
                         </form>
                     </div>
@@ -25,5 +32,6 @@
             </div>
         </div>
     </div>
+
 </body>
 </html>

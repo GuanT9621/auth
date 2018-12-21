@@ -167,6 +167,7 @@ public class SsoController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(@RequestParam(value = "u") String username,
                         @RequestParam(value = "p") String password,
+                        @RequestParam(value = "k") Integer keep,
                         Model model) {
         SessionValue sessionValue = (SessionValue) session.getAttribute(LOGIN_INFO);
 
@@ -211,7 +212,14 @@ public class SsoController {
             redisDO.setUid(uid);
             String token = TokenUtil.makeToken();
             redisService.set(token, redisDO, TOKEN_ALIVE_TIME);
-            CookiesUtil.writeCookie(response, domain, SSO_COOKIE_NAME, token);
+            // 一个月不过期
+            Integer expiry;
+            if (0 == keep) {
+                expiry =  -1;
+            } else {
+                expiry = 60 * 60 * 24 * keep;
+            }
+            CookiesUtil.writeCookie(response, domain, SSO_COOKIE_NAME, token, expiry);
             String redirectUrl = sessionValue.getRedirectUrl();
             String html = "<script type='text/javascript'>location.href='" + redirectUrl + "';</script>";
             try {
