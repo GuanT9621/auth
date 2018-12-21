@@ -8,8 +8,6 @@ public class SessionValue implements Serializable {
 
     private String redirectUrl;
 
-    private Integer xlogin;
-
     public Long getAppId() {
         return appId;
     }
@@ -26,20 +24,11 @@ public class SessionValue implements Serializable {
         this.redirectUrl = redirectUrl;
     }
 
-    public Integer getXlogin() {
-        return xlogin;
-    }
-
-    public void setXlogin(Integer xlogin) {
-        this.xlogin = xlogin;
-    }
-
     @Override
     public String toString() {
         return "SessionValue{" +
                 "appId=" + appId +
                 ", redirectUrl='" + redirectUrl + '\'' +
-                ", xlogin=" + xlogin +
                 '}';
     }
 }

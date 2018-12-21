@@ -19,7 +19,7 @@
     </parent>
 
     <properties>
-        <grpc.version>1.16.1</grpc.version>
+        <grpc.version>1.17.1</grpc.version>
         <protobuf.version>3.6.1</protobuf.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -73,7 +73,6 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-
         <!-- About Protocol Buffer-->
         <dependency>
             <groupId>io.grpc</groupId>
@@ -104,7 +103,6 @@
             <artifactId>guava</artifactId>
             <version>27.0.1-jre</version>
         </dependency>
-
 
     </dependencies>
 

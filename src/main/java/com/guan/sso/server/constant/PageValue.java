@@ -1,9 +1,7 @@
 package com.guan.sso.server.constant;
 
 public class PageValue {
-    public static final String DENY_PAGE = "deny";
-    public static final String LOGIN_PAGE = "login";
-    public static final String X_LOGIN_PAGE = "xlogin";
-    public static final String ERROR_PAGE = "error";
-    public static final String JUMP_PAGE = "jump";
+    public static final String PAGE_DENY = "deny";
+    public static final String PAGE_LOGIN = "login";
+    public static final String PAGE_JUMP = "jump";
 }
