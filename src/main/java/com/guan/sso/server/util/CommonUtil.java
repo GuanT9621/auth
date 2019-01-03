@@ -1,5 +1,6 @@
 package com.guan.sso.server.util;
 
+
 import org.apache.commons.lang.StringUtils;
 
 public class CommonUtil {
